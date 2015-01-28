@@ -45,6 +45,8 @@
 		this.bullets = [];
 		this.speed = 0;
 		this.canShoot = true;
+
+        setInterval(function() { this.speed = Math.max(0, this.speed - .1); }.bind(this), 100);
 	};
 	
 	Player.prototype.draw = function(screen, gameSize) {
@@ -107,11 +109,10 @@
 		
 		if (this.keyboard.isDown(this.keyboard.KEYS.UP)) {
 			this.speed = 1.75;
-			this.center.x += 1.75 * Math.sin(0 + this.angle);
-			this.center.y -= 1.75 * Math.cos(0 + this.angle);
-		} else {
-			this.speed = 0;
 		}
+
+		this.center.x += this.speed * Math.sin(0 + this.angle);
+		this.center.y -= this.speed * Math.cos(0 + this.angle);
 		
 		if (this.keyboard.isDown(this.keyboard.KEYS.SPACE)) {
 			this.fireBullet();
@@ -172,15 +173,6 @@
 		++this.timer;
 		this.center.y -= (this.speed + 2.25) * Math.cos(0 + this.angle);
 		this.center.x += (this.speed + 2.25) * Math.sin(0 + this.angle);
-	};
-	
-	function throttle(timeout, callback) {
-	    this.canCall = true;
-	    if (this.canCall) {
-	        this.canCall = false;
-	        setTimeout(timeout, function() { this.canCall = true; }.bind(this));
-	        callback();
-        }
 	};
 	
 	window.onload = function() {
