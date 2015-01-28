@@ -43,8 +43,8 @@
 		this.size = { x: 10, y: 10 };
 		this.keyboard = new Keyboard();
 		this.bullets = [];
-		this.shotTimeout = 0;
 		this.speed = 0;
+		this.canShoot = true;
 	};
 	
 	Player.prototype.draw = function(screen, gameSize) {
@@ -66,10 +66,32 @@
 	};
 	
 	Player.prototype.fireBullet = function() {
-		if (this.shotTimeout == 0) {
-			this.shotTimeout = 15;
-			this.bullets.push(new Bullet({ x: this.center.x, y: this.center.y }, this.angle, this.speed));
-		}
+	    if (this.canShoot) {
+	        this.canShoot = false;
+            setTimeout(function() { this.canShoot = true; }.bind(this), 250);
+	        this.bullets.push(new Bullet({ x: this.getGunPosition().x, y: this.getGunPosition().y }, this.angle, this.speed));
+        }
+	};
+	
+	function throttle(callback, timeout) {
+	    return function() {
+	        if (typeof this.throttled === 'undefined') {
+	            this.throttled = false;
+            }
+            
+            if (!this.throttled) {
+                this.throttled = true;
+                setTimeout(function() { this.throttled = false; }.bind(this), timeout);
+    	        callback();
+	        }
+	    };
+	}
+	
+	Player.prototype.getGunPosition = function() {
+	    return {
+	        x: this.center.x + (10 * Math.sin(this.angle)),
+	        y: this.center.y - (10 * Math.cos(this.angle))
+        };
 	};
 
 	Player.prototype.update = function() {
@@ -85,8 +107,8 @@
 		
 		if (this.keyboard.isDown(this.keyboard.KEYS.UP)) {
 			this.speed = 1.75;
-			this.center.y -= 1.75 * Math.cos(0 + this.angle);
 			this.center.x += 1.75 * Math.sin(0 + this.angle);
+			this.center.y -= 1.75 * Math.cos(0 + this.angle);
 		} else {
 			this.speed = 0;
 		}
@@ -102,11 +124,6 @@
 		this.bullets = this.bullets.filter(function(bullet) {
 			return !bullet.isValid();
 		});
-		
-		this.shotTimeout = Math.max(
-			this.shotTimeout - 1,
-			0
-		);
 	};
 	
 	var Keyboard = function() {
@@ -155,6 +172,15 @@
 		++this.timer;
 		this.center.y -= (this.speed + 2.25) * Math.cos(0 + this.angle);
 		this.center.x += (this.speed + 2.25) * Math.sin(0 + this.angle);
+	};
+	
+	function throttle(timeout, callback) {
+	    this.canCall = true;
+	    if (this.canCall) {
+	        this.canCall = false;
+	        setTimeout(timeout, function() { this.canCall = true; }.bind(this));
+	        callback();
+        }
 	};
 	
 	window.onload = function() {
