@@ -1,9 +1,32 @@
 ;(function() {
+	Function.prototype.throttle = function(timeout) {
+		return function() {
+			if (typeof this.throttled === 'undefined') {
+				this.throttled = false;
+			}
+			
+			if (!this.throttled) {
+				this.throttled = true;
+				setTimeout(function() { this.throttled = false; }.bind(this), 350);
+				this.call();
+			}
+		}.bind(this);
+	};
+	
+	Number.prototype.modulo = function(n) {
+		return ((this%n)+n)%n;
+	};
+	
+	Math.getRandomInt = function(min, max) {
+		return Math.floor(Math.random() * (max - min)) + min;
+	}
+	
 	var Asteroids = function(canvasId) {
 		this.canvas = document.getElementById(canvasId);
 		this.screen = this.canvas.getContext('2d');
 		this.gameSize = { x: this.canvas.width, y: this.canvas.height };
 		this.player = new Player(this, this.gameSize);
+		this.asteroid = new Asteroid({ x: 200, y: 200 }, new CanvasVector(0, 0));
 
 		this.onTickHandler = this.onTickHandler.bind(this);
 
@@ -18,6 +41,7 @@
 		screen.restore();
 
 		this.player.draw(screen, gameSize);
+		this.asteroid.draw(screen, gameSize);
 
 		return this;
 	};
@@ -31,6 +55,7 @@
 	
 	Asteroids.prototype.update = function() {
 		this.player.update();
+		this.asteroid.update();
 		
 		return this;
 	};
@@ -47,8 +72,8 @@
 		this.attemptToFireBullet = this.attemptToFireBullet.bind(this).throttle(250);
 		
 		setInterval(function() {
-			this.momentum = this.momentum.addMagnatude(-.1).magnatudeRange(0, 3.75);
-		}.bind(this), 75);
+			this.momentum = this.momentum.addMagnatude(-.1).magnatudeRange(0, 3.5);
+		}.bind(this), 50);
 	};
 	
 	Player.prototype.draw = function(screen, gameSize) {	
@@ -79,7 +104,7 @@
 		}
 		
 		if (this.keyboard.isDown(this.keyboard.KEYS.UP)) {
-			this.momentum = this.momentum.add(new CanvasVector(.5, this.angle)).magnatudeRange(0, 2);
+			this.momentum = this.momentum.add(new CanvasVector(.15, this.angle)).magnatudeRange(0, 3.5);
 		}
 		
 		if (this.keyboard.isDown(this.keyboard.KEYS.SPACE)) {
@@ -102,24 +127,6 @@
 		this.bullets.push(new Bullet(this.center, new CanvasVector(this.momentum.getMagnatude(), this.angle)));
 		
 		return true;
-	};
-	
-	Function.prototype.throttle = function(timeout) {
-		return function() {
-			if (typeof this.throttled === 'undefined') {
-				this.throttled = false;
-			}
-			
-			if (!this.throttled) {
-				this.throttled = true;
-				setTimeout(function() { this.throttled = false; }.bind(this), 350);
-				this.call();
-			}
-		}.bind(this);
-	};
-	
-	Number.prototype.modulo = function(n) {
-		return ((this%n)+n)%n;
 	};
 	
 	var Keyboard = function() {
@@ -208,6 +215,42 @@
 		}
 		
 		return this;
+	};
+	
+	function Asteroid(center, momentum) {
+		this.center = center;
+		this.momentum = momentum;
+
+		var temp = [];
+		for (var i = 0, n = Math.getRandomInt(5, 8); i < n; ++i) {
+			temp.push(i);
+		}
+		
+		this.points = temp.map(function() {
+			return new CanvasVector(Math.getRandomInt(10, 20), Math.getRandomInt(0, 180) * Math.PI / 180);
+		}).sort(function(a, b) {
+			return a.getAngle() - b.getAngle();
+		}).map(function(vector) {
+			return { x: vector.getX(), y: vector.getY() };
+		});
+	};
+
+	Asteroid.prototype.update = function() {
+		this.center.x += this.momentum.getX();
+		this.center.y += this.momentum.getY();
+	};
+	
+	Asteroid.prototype.draw = function(screen, gameSize) {
+		screen.save();
+		screen.translate(this.center.x.modulo(gameSize.x), this.center.y.modulo(gameSize.y));
+		screen.strokeStyle = "#FFFFFF";
+		screen.moveTo(this.points[0].x, this.points[0].y);
+		this.points.slice(1).forEach(function(point) {
+			screen.lineTo(point.x, point.y);
+		});
+		screen.closePath();
+		screen.stroke();
+		screen.restore();
 	};
 
 	window.onload = function() {
