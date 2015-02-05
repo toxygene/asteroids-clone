@@ -26,7 +26,7 @@
 		this.screen = this.canvas.getContext('2d');
 		this.gameSize = { x: this.canvas.width, y: this.canvas.height };
 		this.player = new Player(this, this.gameSize);
-		this.asteroid = new Asteroid({ x: 200, y: 200 }, new CanvasVector(0, 0));
+		this.asteroid = new Asteroid({ x: 200, y: 200 }, new CanvasVector(.5, Math.random() * Math.PI));
 
 		this.onTickHandler = this.onTickHandler.bind(this);
 
@@ -221,18 +221,7 @@
 		this.center = center;
 		this.momentum = momentum;
 
-		var temp = [];
-		for (var i = 0, n = Math.getRandomInt(5, 8); i < n; ++i) {
-			temp.push(i);
-		}
-		
-		this.points = temp.map(function() {
-			return new CanvasVector(Math.getRandomInt(10, 20), Math.getRandomInt(0, 180) * Math.PI / 180);
-		}).sort(function(a, b) {
-			return a.getAngle() - b.getAngle();
-		}).map(function(vector) {
-			return { x: vector.getX(), y: vector.getY() };
-		});
+		this.points = generateRandomPolygon(Math.getRandomInt(5, 8))
 	};
 
 	Asteroid.prototype.update = function() {
@@ -244,16 +233,70 @@
 		screen.save();
 		screen.translate(this.center.x.modulo(gameSize.x), this.center.y.modulo(gameSize.y));
 		screen.strokeStyle = "#FFFFFF";
+		
 		screen.moveTo(this.points[0].x, this.points[0].y);
 		this.points.slice(1).forEach(function(point) {
 			screen.lineTo(point.x, point.y);
 		});
+		
 		screen.closePath();
 		screen.stroke();
 		screen.restore();
 	};
+	
+	function generateRandomPolygon(vertices) {
+		var angleSteps = [];
+		var numberAngles = 2 * Math.PI / vertices;
+		var sum = 0;
+		
+		for (var i = 0; i < vertices; ++i) {
+			var tmp = numberAngles;
+			angleSteps.push(tmp);
+			sum += tmp;
+		}
+		
+		var k = sum / (2 * Math.PI);
+		for (var i = 0; i < vertices; ++i) {
+			angleSteps[i] = angleSteps[i] / k;
+		}
+		
+		var points = [];
+		var angle = Math.random(0, 2 * Math.PI);
+		
+		for (var i = 0; i < vertices; ++i) {
+			var r_i = Math.max(0, Math.min(Math.randomGaussian(40, 20), 80));
+			var x = r_i * Math.cos(angle);
+			var y = r_i * Math.sin(angle);
+			
+			points.push({ x: parseInt(x), y: parseInt(y) });
+			
+			angle += angleSteps[i];
+		}
+		
+		return points;
+	};
+	
+	Math.randomGaussian = function(mean, standardDeviation) {
+		if (Math.randomGaussian.nextGaussian !== undefined) {
+			var nextGaussian = Math.randomGaussian.nextGaussian;
+			delete Math.randomGaussian.nextGaussian;
+			return (nextGaussian * standardDeviation) + mean;
+		} else {
+			var v1, v2, s, multiplier;
+			do {
+				v1 = 2 * Math.random() - 1; // between -1 and 1
+				v2 = 2 * Math.random() - 1; // between -1 and 1
+				s = v1 * v1 + v2 * v2;
+			} while (s >= 1 || s == 0);
+			multiplier = Math.sqrt(-2 * Math.log(s) / s);
+			Math.randomGaussian.nextGaussian = v2 * multiplier;
+			return (v1 * multiplier * standardDeviation) + mean;
+		}
+	};
 
 	window.onload = function() {
 		new Asteroids('screen');
+		
+		console.log(generateRandomPolygon(7));
 	};
 })();
