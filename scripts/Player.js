@@ -1,4 +1,4 @@
-require(function(require) {
+define(function(require) {
     var Bullet = require('Bullet');
     var CanvasVector = require('CanvasVector');
     var Keyboard = require('Keyboard');
