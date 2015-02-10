@@ -1,62 +1,64 @@
 define(function(require) {
-	function generateRandomPolygon(vertices) {
-		var angleSteps = [];
-		var numberAngles = 2 * Math.PI / vertices;
-		var sum = 0;
-		
-		for (var i = 0; i < vertices; ++i) {
-			var tmp = numberAngles;
-			angleSteps.push(tmp);
-			sum += tmp;
-		}
-		
-		var k = sum / (2 * Math.PI);
-		for (var i = 0; i < vertices; ++i) {
-			angleSteps[i] = angleSteps[i] / k;
-		}
-		
-		var points = [];
-		var angle = Math.random(0, 2 * Math.PI);
-		
-		for (var i = 0; i < vertices; ++i) {
-			var r_i = Math.max(0, Math.min(Math.randomGaussian(40, 20), 80));
-			var x = r_i * Math.cos(angle);
-			var y = r_i * Math.sin(angle);
-			
-			points.push({ x: parseInt(x), y: parseInt(y) });
-			
-			angle += angleSteps[i];
-		}
-		
-		return points;
-	};
-	
-	function Asteroid(center, momentum) {
-		this.center = center;
-		this.momentum = momentum;
+    var modulo = require('utilities/modulo');
 
-		this.points = generateRandomPolygon(Math.getRandomInt(5, 8))
-	};
+    function generateRandomPolygon(vertices) {
+        var angleSteps = [];
+        var numberAngles = 2 * Math.PI / vertices;
+        var sum = 0;
+        
+        for (var i = 0; i < vertices; ++i) {
+            var tmp = numberAngles;
+            angleSteps.push(tmp);
+            sum += tmp;
+        }
+        
+        var k = sum / (2 * Math.PI);
+        for (var i = 0; i < vertices; ++i) {
+            angleSteps[i] = angleSteps[i] / k;
+        }
+        
+        var points = [];
+        var angle = Math.random(0, 2 * Math.PI);
+        
+        for (var i = 0; i < vertices; ++i) {
+            var r_i = Math.max(0, Math.min(Math.randomGaussian(40, 20), 80));
+            var x = r_i * Math.cos(angle);
+            var y = r_i * Math.sin(angle);
+            
+            points.push({ x: parseInt(x), y: parseInt(y) });
+            
+            angle += angleSteps[i];
+        }
+        
+        return points;
+    };
+    
+    function Asteroid(center, momentum) {
+        this.center = center;
+        this.momentum = momentum;
 
-	Asteroid.prototype.update = function() {
-		this.center.x += this.momentum.getX();
-		this.center.y += this.momentum.getY();
-	};
-	
-	Asteroid.prototype.draw = function(screen, gameSize) {
-		screen.save();
-		screen.translate(this.center.x.modulo(gameSize.x), this.center.y.modulo(gameSize.y));
-		screen.strokeStyle = "#FFFFFF";
-		
-		screen.moveTo(this.points[0].x, this.points[0].y);
-		this.points.slice(1).forEach(function(point) {
-			screen.lineTo(point.x, point.y);
-		});
-		
-		screen.closePath();
-		screen.stroke();
-		screen.restore();
-	};
-	
-	return Asteroid;
+        this.points = generateRandomPolygon(Math.getRandomInt(5, 8))
+    };
+
+    Asteroid.prototype.update = function() {
+        this.center.x += this.momentum.getX();
+        this.center.y += this.momentum.getY();
+    };
+    
+    Asteroid.prototype.draw = function(screen, gameSize) {
+        screen.save();
+        screen.translate(modulo(this.center.x, gameSize.x), modulo(this.center.y, gameSize.y));
+        screen.strokeStyle = "#FFFFFF";
+        
+        screen.moveTo(this.points[0].x, this.points[0].y);
+        this.points.slice(1).forEach(function(point) {
+            screen.lineTo(point.x, point.y);
+        });
+        
+        screen.closePath();
+        screen.stroke();
+        screen.restore();
+    };
+    
+    return Asteroid;
 });
