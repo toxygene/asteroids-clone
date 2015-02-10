@@ -2,7 +2,6 @@ define(function(require) {
     var Asteroid = require('Asteroid');
     var CanvasVector = require('CanvasVector');
     var Player = require('Player');
-    debugger;
 
 	var Asteroids = function(canvasId) {
 		this.asteroid = new Asteroid({ x: 200, y: 200 }, new CanvasVector(.5, Math.random() * Math.PI));
