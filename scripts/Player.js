@@ -48,57 +48,26 @@ define(function(require) {
     };
 
     Player.prototype.drawGhostShips = function(screen, gameSize) {
-        // left
-        screen.save();
-        screen.translate(modulo(this.center.x, gameSize.x) - gameSize.x, modulo(this.center.y, gameSize.y));
-        screen.rotate(this.angle);
-        screen.strokeStyle = "#FFFFFF";
-        screen.beginPath();
-        screen.moveTo(10, 0);
-        screen.lineTo(-10, 6);
-        screen.lineTo(-10, -6);
-        screen.closePath();
-        screen.stroke();
-        screen.restore();
+        for (var i = 0; i < 9; ++i) {
+            var x = modulo(i, 3) - 1;
+            var y = Math.floor(i / 3) - 1;
 
-        // top
-        screen.save();
-        screen.translate(modulo(this.center.x, gameSize.x), modulo(this.center.y, gameSize.y) - gameSize.y);
-        screen.rotate(this.angle);
-        screen.strokeStyle = "#FFFFFF";
-        screen.beginPath();
-        screen.moveTo(10, 0);
-        screen.lineTo(-10, 6);
-        screen.lineTo(-10, -6);
-        screen.closePath();
-        screen.stroke();
-        screen.restore();
+            if (x == 0 && y == 0) {
+                continue;
+            }
 
-        // right
-        screen.save();
-        screen.translate(modulo(this.center.x, gameSize.x) + gameSize.x, modulo(this.center.y, gameSize.y));
-        screen.rotate(this.angle);
-        screen.strokeStyle = "#FFFFFF";
-        screen.beginPath();
-        screen.moveTo(10, 0);
-        screen.lineTo(-10, 6);
-        screen.lineTo(-10, -6);
-        screen.closePath();
-        screen.stroke();
-        screen.restore();
-
-        // bottom
-        screen.save();
-        screen.translate(modulo(this.center.x, gameSize.x), modulo(this.center.y, gameSize.y) + gameSize.y);
-        screen.rotate(this.angle);
-        screen.strokeStyle = "#FFFFFF";
-        screen.beginPath();
-        screen.moveTo(10, 0);
-        screen.lineTo(-10, 6);
-        screen.lineTo(-10, -6);
-        screen.closePath();
-        screen.stroke();
-        screen.restore();
+            screen.save();
+            screen.strokeStyle = "#FFFFFF";
+            screen.translate(modulo(this.center.x, gameSize.x) - (x * gameSize.x), modulo(this.center.y, gameSize.y) - (y * gameSize.y));
+            screen.rotate(this.angle);
+            screen.beginPath();
+            screen.moveTo(10, 0);
+            screen.lineTo(-10, 6);
+            screen.lineTo(-10, -6);
+            screen.closePath();
+            screen.stroke();
+            screen.restore();
+        }
 
         return this;
     };

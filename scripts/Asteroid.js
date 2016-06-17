@@ -71,9 +71,30 @@ define(function(require) {
     };
 
     Asteroid.prototype.drawGhosts = function(screen, gameSize) {
-        screen.save();
+        for (var i = 0; i < 9; ++i) {
+            var x = modulo(i, 3) - 1;
+            var y = Math.floor(i / 3) - 1;
 
+            if (x == 0 && y == 0) {
+                continue;
+            }
+
+            screen.save();
+            screen.strokeStyle = "#FFFFFF";
+            screen.translate(modulo(this.center.x, gameSize.x) - (x * gameSize.x), modulo(this.center.y, gameSize.y) - (y * gameSize.y));
+            screen.moveTo(this.points[0].x, this.points[0].y);
+            screen.beginPath();
+            this.points.slice(1).forEach(function(point) {
+                screen.lineTo(point.x, point.y);
+            });
+            screen.closePath();
+            screen.stroke();
+            screen.restore();
+        }
+
+/*
         // left
+        screen.save();
         screen.strokeStyle = "#FFFFFF";
         screen.translate(modulo(this.center.x, gameSize.x) - gameSize.x, modulo(this.center.y, gameSize.y));
         screen.moveTo(this.points[0].x, this.points[0].y);
@@ -83,11 +104,10 @@ define(function(require) {
         });
         screen.closePath();
         screen.stroke();
-
         screen.restore();
-        screen.save();
 
         // top
+        screen.save();
         screen.strokeStyle = "#FFFFFF";
         screen.translate(modulo(this.center.x, gameSize.x), modulo(this.center.y, gameSize.y) - gameSize.y);
         screen.moveTo(this.points[0].x, this.points[0].y);
@@ -113,9 +133,9 @@ define(function(require) {
         screen.stroke();
 
         screen.restore();
-        screen.save();
 
         // bottom
+        screen.save();
         screen.strokeStyle = "#FFFFFF";
         screen.translate(modulo(this.center.x, gameSize.x), modulo(this.center.y, gameSize.y) + gameSize.y);
         screen.moveTo(this.points[0].x, this.points[0].y);
@@ -126,7 +146,7 @@ define(function(require) {
         screen.closePath();
         screen.stroke();
         screen.restore();
-
+*/
         return this;
     };
 
