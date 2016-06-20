@@ -3,6 +3,7 @@ define(function(require) {
     var CanvasVector = require('CanvasVector');
     var Keyboard = require('Keyboard');
     var modulo = require('utilities/modulo');
+    var rotate = require('utilities/rotate');
     var throttle = require('utilities/throttle');
 
     var Player = function(game, gameSize) {
@@ -11,7 +12,6 @@ define(function(require) {
         this.center = { x: gameSize.x / 2, y: gameSize.y / 2 };
         this.angle = -Math.PI/2;
         this.momentum = new CanvasVector(0, 0);
-        this.size = { x: 10, y: 10 };
         this.keyboard = new Keyboard();
         this.bullets = [];
         this.attemptToFireBullet = throttle(this.attemptToFireBullet.bind(this), 250);
@@ -21,16 +21,16 @@ define(function(require) {
         }.bind(this), 50);
     };
 
-    Player.prototype.draw = function(screen, gameSize) {
-        this.drawShip(screen, gameSize)
-            .drawGhostShips(screen, gameSize)
-            .drawBullets(screen, gameSize);
-    }
+    Player.prototype.draw = function(screen) {
+        this.drawShip(screen)
+            .drawGhostShips(screen)
+            .drawBullets(screen);
+    };
 
-    Player.prototype.drawShip = function(screen, gameSize) {
+    Player.prototype.drawShip = function(screen) {
         screen.save();
 
-        screen.translate(modulo(this.center.x, gameSize.x), modulo(this.center.y, gameSize.y));
+        screen.translate(this.center.x, this.center.y);
         screen.rotate(this.angle);
         screen.strokeStyle = "#FFFFFF";
 
@@ -47,7 +47,7 @@ define(function(require) {
         return this;
     };
 
-    Player.prototype.drawGhostShips = function(screen, gameSize) {
+    Player.prototype.drawGhostShips = function(screen) {
         for (var i = 0; i < 9; ++i) {
             var x = modulo(i, 3) - 1;
             var y = Math.floor(i / 3) - 1;
@@ -58,7 +58,7 @@ define(function(require) {
 
             screen.save();
             screen.strokeStyle = "#FFFFFF";
-            screen.translate(modulo(this.center.x, gameSize.x) - (x * gameSize.x), modulo(this.center.y, gameSize.y) - (y * gameSize.y));
+            screen.translate(this.center.x - (x * this.gameSize.x), this.center.y - (y * this.gameSize.y));
             screen.rotate(this.angle);
             screen.beginPath();
             screen.moveTo(10, 0);
@@ -72,10 +72,16 @@ define(function(require) {
         return this;
     };
 
-    Player.prototype.drawBullets = function(screen, gameSize) {
+    Player.prototype.drawBullets = function(screen) {
         this.bullets.forEach(function(bullet) {
-            bullet.draw(screen, gameSize);
+            bullet.draw(screen);
         });
+    };
+
+    Player.prototype.getVertices = function() {
+        return rotate([[10, 0], [-10, 6], [-10, -6]], this.momentum.getAngle()).map(function(point) {
+            return [point[0] + this.x, point[1] + this.y]
+        }.bind(this.center));
     };
 
     Player.prototype.update = function() {
@@ -95,8 +101,8 @@ define(function(require) {
             this.attemptToFireBullet();
         }
 
-        this.center.x += this.momentum.getX();
-        this.center.y += this.momentum.getY();
+        this.center.x = modulo(this.center.x + this.momentum.getX(), this.gameSize.x);
+        this.center.y = modulo(this.center.y + this.momentum.getY(), this.gameSize.y);
 
         this.bullets = this.bullets.filter(function(bullet) {
             return bullet.isValid();
@@ -108,7 +114,7 @@ define(function(require) {
     };
 
     Player.prototype.attemptToFireBullet = function() {
-        this.bullets.push(new Bullet(this.center, new CanvasVector(this.momentum.getMagnatude(), this.angle)));
+        this.bullets.push(new Bullet(this.center, new CanvasVector(this.momentum.getMagnatude(), this.angle), this.gameSize));
 
         return true;
     };
