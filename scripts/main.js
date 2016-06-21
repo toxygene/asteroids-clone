@@ -21,7 +21,8 @@
         }
     };
 
-    requirejs(['Level'], function(Level) {
-        new Level(document.getElementById('screen'));
+    requirejs(['Game'], function(Game) {
+        var game = new Game(document.getElementById('screen'));
+        game.start();
     });
 })();

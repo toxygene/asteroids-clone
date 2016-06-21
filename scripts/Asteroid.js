@@ -34,20 +34,19 @@ define(function(require) {
         return points;
     };
 
-    function Asteroid(center, momentum, gameSize) {
+    function Asteroid(center, momentum) {
         this.center = center;
         this.momentum = momentum;
-        this.gameSize = gameSize;
 
         this.points = generateRandomPolygon(Math.getRandomInt(5, 8))
     }
 
-    Asteroid.prototype.draw = function(screen) {
-        this.drawAsteroid(screen)
-            .drawGhosts(screen);
+    Asteroid.prototype.draw = function(screen, gameSize) {
+        this.drawAsteroid(screen, gameSize)
+            .drawGhosts(screen, gameSize);
     };
 
-    Asteroid.prototype.drawAsteroid = function(screen) {
+    Asteroid.prototype.drawAsteroid = function(screen, gameSize) {
         screen.save();
 
         screen.strokeStyle = "#FFFFFF";
@@ -67,7 +66,7 @@ define(function(require) {
         return this;
     };
 
-    Asteroid.prototype.drawGhosts = function(screen) {
+    Asteroid.prototype.drawGhosts = function(screen, gameSize) {
         for (var i = 0; i < 9; ++i) {
             var x = modulo(i, 3) - 1;
             var y = Math.floor(i / 3) - 1;
@@ -78,7 +77,7 @@ define(function(require) {
 
             screen.save();
             screen.strokeStyle = "#FFFFFF";
-            screen.translate(this.center.x - (x * this.gameSize.x), this.center.y - (y * this.gameSize.y));
+            screen.translate(this.center.x - (x * gameSize.x), this.center.y - (y * gameSize.y));
             screen.moveTo(this.points[0][0], this.points[0][1]);
             screen.beginPath();
             this.points.slice(1).forEach(function(point) {
@@ -98,9 +97,9 @@ define(function(require) {
         }.bind(this.center));
     };
 
-    Asteroid.prototype.update = function() {
-        this.center.x = modulo(this.center.x + this.momentum.getX(), this.gameSize.x);
-        this.center.y = modulo(this.center.y + this.momentum.getY(), this.gameSize.y);
+    Asteroid.prototype.update = function(gameSize) {
+        this.center.x = modulo(this.center.x + this.momentum.getX(), gameSize.x);
+        this.center.y = modulo(this.center.y + this.momentum.getY(), gameSize.y);
     };
 
     return Asteroid;

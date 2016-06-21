@@ -4,12 +4,12 @@ define(function(require) {
 			if (typeof this.throttled === 'undefined') {
 				this.throttled = false;
 			}
-			
+
 			if (!this.throttled) {
 				this.throttled = true;
-				setTimeout(function() { this.throttled = false; }.bind(this), 350);
-				this.call();
+				setTimeout(function() { this.throttled = false; }.bind(this), timeout);
+				callback.call();
 			}
-		}.bind(callback);
+		}
 	};
 });

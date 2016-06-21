@@ -6,30 +6,30 @@ define(function(require) {
     var rotate = require('utilities/rotate');
     var throttle = require('utilities/throttle');
 
-    var PlayerShip = function(game, gameSize) {
-        this.game = game;
-        this.gameSize = gameSize;
-        this.center = { x: gameSize.x / 2, y: gameSize.y / 2 };
+    var PlayerShip = function() {
         this.angle = -Math.PI/2;
-        this.momentum = new CanvasVector(0, -Math.PI/2);
+        this.center = null;
+        this.momentum = new CanvasVector(0, this.angle);
         this.keyboard = new Keyboard();
         this.bullets = [];
-        this.attemptToFireBullet = throttle(this.attemptToFireBullet.bind(this), 250);
+        this.attemptToFireBullet = throttle(this.attemptToFireBullet.bind(this), PlayerShip.MIN_BULLET_THROTTLE);
 
         setInterval(function() {
             this.momentum = this.momentum.addMagnatude(-.1).magnatudeRange(0, PlayerShip.MAX_MAGNATUDE);
         }.bind(this), 50);
     };
 
-    PlayerShip.MAX_MAGNATUDE = 3.5;
+    PlayerShip.MIN_BULLET_THROTTLE = 250;
+    PlayerShip.MAX_BULLETS         = 5;
+    PlayerShip.MAX_MAGNATUDE       = 3.5;
 
-    PlayerShip.prototype.draw = function(screen) {
-        this.drawShip(screen)
-            .drawGhostShips(screen)
-            .drawBullets(screen);
+    PlayerShip.prototype.draw = function(screen, gameSize) {
+        this.drawShip(screen, gameSize)
+            .drawGhostShips(screen, gameSize)
+            .drawBullets(screen, gameSize);
     };
 
-    PlayerShip.prototype.drawShip = function(screen) {
+    PlayerShip.prototype.drawShip = function(screen, gameSize) {
         screen.save();
 
         screen.translate(this.center.x, this.center.y);
@@ -49,7 +49,7 @@ define(function(require) {
         return this;
     };
 
-    PlayerShip.prototype.drawGhostShips = function(screen) {
+    PlayerShip.prototype.drawGhostShips = function(screen, gameSize) {
         for (var i = 0; i < 9; ++i) {
             var x = modulo(i, 3) - 1;
             var y = Math.floor(i / 3) - 1;
@@ -60,7 +60,7 @@ define(function(require) {
 
             screen.save();
             screen.strokeStyle = "#FFFFFF";
-            screen.translate(this.center.x - (x * this.gameSize.x), this.center.y - (y * this.gameSize.y));
+            screen.translate(this.center.x - (x * gameSize.x), this.center.y - (y * gameSize.y));
             screen.rotate(this.angle);
             screen.beginPath();
             screen.moveTo(10, 0);
@@ -74,9 +74,9 @@ define(function(require) {
         return this;
     };
 
-    PlayerShip.prototype.drawBullets = function(screen) {
+    PlayerShip.prototype.drawBullets = function(screen, gameSize) {
         this.bullets.forEach(function(bullet) {
-            bullet.draw(screen);
+            bullet.draw(screen, gameSize);
         });
     };
 
@@ -86,7 +86,11 @@ define(function(require) {
         }.bind(this.center));
     };
 
-    PlayerShip.prototype.update = function() {
+    PlayerShip.prototype.update = function(gameSize) {
+        if (this.center === null) {
+            this.center = { x: gameSize.x / 2, y: gameSize.y / 2 };
+        }
+
         if (this.keyboard.isDown(this.keyboard.KEYS.LEFT)) {
             this.angle -= Math.PI/36;
         }
@@ -98,26 +102,27 @@ define(function(require) {
         if (this.keyboard.isDown(this.keyboard.KEYS.UP)) {
             this.momentum = this.momentum.add(new CanvasVector(.15, this.angle)).magnatudeRange(0, PlayerShip.MAX_MAGNATUDE);
         }
-        console.log(this.momentum.getMagnatude());
 
         if (this.keyboard.isDown(this.keyboard.KEYS.SPACE)) {
             this.attemptToFireBullet();
         }
 
-        this.center.x = modulo(this.center.x + this.momentum.getX(), this.gameSize.x);
-        this.center.y = modulo(this.center.y + this.momentum.getY(), this.gameSize.y);
+        this.center.x = modulo(this.center.x + this.momentum.getX(), gameSize.x);
+        this.center.y = modulo(this.center.y + this.momentum.getY(), gameSize.y);
 
         this.bullets = this.bullets.filter(function(bullet) {
             return bullet.isValid();
         });
 
         this.bullets.forEach(function(bullet) {
-            bullet.update();
+            bullet.update(gameSize);
         });
     };
 
     PlayerShip.prototype.attemptToFireBullet = function() {
-        this.bullets.push(new Bullet(this.center, new CanvasVector(this.momentum.getMagnatude(), this.angle), this.gameSize));
+        if (this.bullets.length < PlayerShip.MAX_BULLETS) {
+            this.bullets.push(new Bullet(this.center, new CanvasVector(this.momentum.getMagnatude(), this.angle), this.gameSize));
+        }
 
         return true;
     };
