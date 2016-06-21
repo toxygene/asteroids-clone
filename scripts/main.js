@@ -2,7 +2,7 @@
     Math.getRandomInt = function(min, max) {
         return Math.floor(Math.random() * (max - min)) + min;
     };
-    
+
     Math.randomGaussian = function(mean, standardDeviation) {
         if (Math.randomGaussian.nextGaussian !== undefined) {
             var nextGaussian = Math.randomGaussian.nextGaussian;
@@ -21,7 +21,7 @@
         }
     };
 
-    requirejs(['Asteroids'], function(Asteroids) {
-        new Asteroids('screen');
+    requirejs(['Level'], function(Level) {
+        new Level(document.getElementById('screen'));
     });
 })();
