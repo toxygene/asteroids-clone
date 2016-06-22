@@ -24,6 +24,19 @@ define(function(require) {
     PlayerShip.MAX_BULLETS         = 5;
     PlayerShip.MAX_MAGNATUDE       = 3.5;
     PlayerShip.COLOR               = '#FFF';
+    PlayerShip.SHAPE               = [
+        [10, 0],
+        [-10, 6],
+        [-10, -6]
+    ];
+
+    PlayerShip.prototype.attemptToFireBullet = function() {
+        if (this.bullets.length < PlayerShip.MAX_BULLETS) {
+            this.bullets.push(new Bullet(this.center, new CanvasVector(this.momentum.getMagnatude(), this.angle), this.gameSize));
+        }
+
+        return true;
+    };
 
     PlayerShip.prototype.draw = function(screen, gameSize) {
         this.drawShip(screen, gameSize)
@@ -39,9 +52,9 @@ define(function(require) {
         screen.strokeStyle = PlayerShip.COLOR;
 
         screen.beginPath();
-        screen.moveTo(10, 0);
-        screen.lineTo(-10, 6);
-        screen.lineTo(-10, -6);
+        screen.moveTo(PlayerShip.SHAPE[0][0], PlayerShip.SHAPE[0][1]);
+        screen.lineTo(PlayerShip.SHAPE[1][0], PlayerShip.SHAPE[1][1]);
+        screen.lineTo(PlayerShip.SHAPE[2][0], PlayerShip.SHAPE[2][1]);
         screen.closePath();
 
         screen.stroke();
@@ -65,9 +78,9 @@ define(function(require) {
             screen.translate(this.center.x - (x * gameSize.x), this.center.y - (y * gameSize.y));
             screen.rotate(this.angle);
             screen.beginPath();
-            screen.moveTo(10, 0);
-            screen.lineTo(-10, 6);
-            screen.lineTo(-10, -6);
+            screen.moveTo(PlayerShip.SHAPE[0][0], PlayerShip.SHAPE[0][1]);
+            screen.lineTo(PlayerShip.SHAPE[1][0], PlayerShip.SHAPE[1][1]);
+            screen.lineTo(PlayerShip.SHAPE[2][0], PlayerShip.SHAPE[2][1]);
             screen.closePath();
             screen.stroke();
             screen.restore();
@@ -83,13 +96,19 @@ define(function(require) {
     };
 
     PlayerShip.prototype.getVertices = function() {
-        return rotate([[10, 0], [-10, 6], [-10, -6]], this.momentum.getAngle()).map(function(point) {
+        return rotate(PlayerShip.SHAPE, this.momentum.getAngle()).map(function(point) {
             return [point[0] + this.x, point[1] + this.y]
         }.bind(this.center));
     };
 
     PlayerShip.prototype.isValid = function() {
         return this.valid;
+    };
+
+    PlayerShip.prototype.remove = function() {
+        this.valid = false;
+
+        return this;
     };
 
     PlayerShip.prototype.update = function(gameSize) {
@@ -119,14 +138,6 @@ define(function(require) {
         this.bullets.forEach(function(bullet) {
             bullet.update(gameSize);
         });
-    };
-
-    PlayerShip.prototype.attemptToFireBullet = function() {
-        if (this.bullets.length < PlayerShip.MAX_BULLETS) {
-            this.bullets.push(new Bullet(this.center, new CanvasVector(this.momentum.getMagnatude(), this.angle), this.gameSize));
-        }
-
-        return true;
     };
 
     return PlayerShip;

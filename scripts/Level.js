@@ -1,9 +1,10 @@
 define(function(require) {
-    var Asteroid     = require('Asteroid');
-    var Bullet       = require('Bullet');
-    var CanvasVector = require('CanvasVector');
-    var inside       = require('utilities/inside');
-    var PlayerShip   = require('PlayerShip');
+    var Asteroid       = require('Asteroid');
+    var Bullet         = require('Bullet');
+    var CanvasVector   = require('CanvasVector');
+    var Disintegration = require('Disintegration');
+    var inside         = require('utilities/inside');
+    var PlayerShip     = require('PlayerShip');
 
 	var Level = function() {
         this.objects = null;
@@ -30,7 +31,7 @@ define(function(require) {
                 new PlayerShip({ x: gameSize.x / 2, y: gameSize.y / 2 })
             ];
 
-            for (var i = 0, n = Math.getRandomInt(1, 3); i < n; ++i) {
+            for (var i = 0, n = Math.getRandomInt(1, 4); i < n; ++i) {
                 this.objects.push(new Asteroid({ x: Math.getRandomInt(0, gameSize.x), y: Math.getRandomInt(0, gameSize.y) }, new CanvasVector(.5, Math.random() * Math.PI)));
             }
         }
@@ -56,7 +57,7 @@ define(function(require) {
         playerShips.forEach(function(playerShip) {
             var playerShipPoints = playerShip.getVertices();
 
-            var collision = asteroids.find(function(asteroid) {
+            var asteroid = asteroids.find(function(asteroid) {
                 var asteroidPoints = asteroid.getVertices();
 
                 return playerShipPoints.some(function(playerShipPoint) {
@@ -64,26 +65,32 @@ define(function(require) {
                 });
             });
 
-            if (collision) {
-                // destroy ship, split/destroy asteroid
+            if (asteroid) {
+                this.objects.push(new Disintegration(playerShip.getVertices()));
+                this.objects.push(new Disintegration(asteroid.getVertices()));
+
+                playerShip.remove();
+                asteroid.remove();
+
+                // split asteroid
             }
-        });
+        }.bind(this));
 
         // TODO move bullet adding code to here (out of PlayerShip)
         asteroids.forEach(function(asteroid) {
             var asteroidPoints = asteroid.getVertices();
 
-            var collision = bullets.filter(function(bullet) {
+            var bullet = bullets.filter(function(bullet) {
                 return bullet.isValid();
             }).find(function(bullet) {
                 return inside(bullet.getVertex(), asteroidPoints);
             });
 
-            if (collision) {
+            if (bullet) {
                 bullet.remove();
                 asteroid.remove();
 
-                // split asteroid?
+                // split asteroid
             }
         });
 
