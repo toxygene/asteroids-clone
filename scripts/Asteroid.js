@@ -11,6 +11,8 @@ define(function(require) {
         this.points = generateRandomPolygon(Math.getRandomInt(5, 8));
     }
 
+    Asteroid.COLOR = '#FFF';
+
     Asteroid.prototype.draw = function(screen, gameSize) {
         this.drawAsteroid(screen, gameSize)
             .drawGhosts(screen, gameSize);
@@ -19,16 +21,16 @@ define(function(require) {
     Asteroid.prototype.drawAsteroid = function(screen, gameSize) {
         screen.save();
 
-        screen.strokeStyle = "#FFFFFF";
-        screen.translate(this.center.x, this.center.y);
-        screen.moveTo(this.points[0][0], this.points[0][1]);
+        var vertices = this.getVertices();
+        var first    = vertices.shift();
 
+        screen.strokeStyle = Asteroid.COLOR;
         screen.beginPath();
-        this.points.slice(1).forEach(function(point) {
-            screen.lineTo(point[0], point[1]);
+        screen.moveTo(first[0], first[1]);
+        vertices.forEach(function(vertex) {
+            screen.lineTo(vertex[0], vertex[1]);
         });
         screen.closePath();
-
         screen.stroke();
 
         screen.restore();
@@ -37,18 +39,22 @@ define(function(require) {
     };
 
     Asteroid.prototype.drawGhosts = function(screen, gameSize) {
+        var vertices = this.getVertices();
+        var first    = vertices.shift();
+
         for (var i = 0; i < 8; ++i) {
             var x = modulo(i - 6, 3) - 1;
             var y = Math.floor(i / 3) - 1;
 
             screen.save();
             screen.strokeStyle = "#FFFFFF";
-            screen.translate(this.center.x - (x * gameSize.x), this.center.y - (y * gameSize.y));
-            screen.moveTo(this.points[0][0], this.points[0][1]);
+            screen.translate(x * gameSize.x, y * gameSize.y);
             screen.beginPath();
-            this.points.slice(1).forEach(function(point) {
-                screen.lineTo(point[0], point[1]);
+            screen.moveTo(first[0], first[1]);
+            vertices.forEach(function(vertex) {
+                screen.lineTo(vertex[0], vertex[1]);
             });
+            screen.closePath();
             screen.closePath();
             screen.stroke();
             screen.restore();
