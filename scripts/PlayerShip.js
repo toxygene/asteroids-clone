@@ -7,7 +7,7 @@ define(function(require) {
     var throttle = require('utilities/throttle');
 
     var PlayerShip = function(center) {
-        this.angle = -Math.PI/2;
+        this.angle = Math.PI/2;
         this.center = center;
         this.momentum = new CanvasVector(0, this.angle);
         this.keyboard = new Keyboard();
@@ -20,10 +20,10 @@ define(function(require) {
         }.bind(this), 50);
     };
 
-    PlayerShip.MIN_BULLET_THROTTLE = 250;
+    PlayerShip.COLOR               = '#FFF';
     PlayerShip.MAX_BULLETS         = 5;
     PlayerShip.MAX_MAGNATUDE       = 3.5;
-    PlayerShip.COLOR               = '#FFF';
+    PlayerShip.MIN_BULLET_THROTTLE = 250;
     PlayerShip.SHAPE               = [
         [10, 0],
         [-10, 6],
@@ -32,7 +32,7 @@ define(function(require) {
 
     PlayerShip.prototype.attemptToFireBullet = function() {
         if (this.bullets.length < PlayerShip.MAX_BULLETS) {
-            this.bullets.push(new Bullet(this.center, new CanvasVector(this.momentum.getMagnatude(), this.angle), this.gameSize));
+            this.bullets.push(new Bullet(this.center, new CanvasVector(this.momentum.getMagnatude(), -this.angle), this.gameSize));
         }
 
         return true;
@@ -47,16 +47,16 @@ define(function(require) {
     PlayerShip.prototype.drawShip = function(screen, gameSize) {
         screen.save();
 
-        screen.translate(this.center.x, this.center.y);
-        screen.rotate(this.angle);
+        var vertices = this.getVertices();
+        var first    = vertices.shift();
+
         screen.strokeStyle = PlayerShip.COLOR;
-
         screen.beginPath();
-        screen.moveTo(PlayerShip.SHAPE[0][0], PlayerShip.SHAPE[0][1]);
-        screen.lineTo(PlayerShip.SHAPE[1][0], PlayerShip.SHAPE[1][1]);
-        screen.lineTo(PlayerShip.SHAPE[2][0], PlayerShip.SHAPE[2][1]);
+        screen.moveTo(first[0], first[1]);
+        vertices.forEach(function(vertex) {
+            screen.lineTo(vertex[0], vertex[1]);
+        });
         screen.closePath();
-
         screen.stroke();
 
         screen.restore();
@@ -74,15 +74,19 @@ define(function(require) {
             }
 
             screen.save();
+
+            var vertices = this.getVertices();
+            var first    = vertices.shift();
+
             screen.strokeStyle = PlayerShip.COLOR;
-            screen.translate(this.center.x - (x * gameSize.x), this.center.y - (y * gameSize.y));
-            screen.rotate(this.angle);
             screen.beginPath();
-            screen.moveTo(PlayerShip.SHAPE[0][0], PlayerShip.SHAPE[0][1]);
-            screen.lineTo(PlayerShip.SHAPE[1][0], PlayerShip.SHAPE[1][1]);
-            screen.lineTo(PlayerShip.SHAPE[2][0], PlayerShip.SHAPE[2][1]);
+            screen.moveTo(first[0] + (gameSize.x * x), first[1] + (gameSize.y * y));
+            vertices.forEach(function(vertex) {
+                screen.lineTo(vertex[0] + (gameSize.x * x), vertex[1] + (gameSize.y * y));
+            });
             screen.closePath();
             screen.stroke();
+
             screen.restore();
         }
 
@@ -96,7 +100,7 @@ define(function(require) {
     };
 
     PlayerShip.prototype.getVertices = function() {
-        return rotate(PlayerShip.SHAPE, this.momentum.getAngle()).map(function(point) {
+        return rotate(PlayerShip.SHAPE, this.angle).map(function(point) {
             return [point[0] + this.x, point[1] + this.y]
         }.bind(this.center));
     };
@@ -113,15 +117,17 @@ define(function(require) {
 
     PlayerShip.prototype.update = function(gameSize) {
         if (this.keyboard.isDown(this.keyboard.KEYS.LEFT)) {
-            this.angle -= Math.PI/36;
-        }
-
-        if (this.keyboard.isDown(this.keyboard.KEYS.RIGHT)) {
             this.angle += Math.PI/36;
         }
 
+        if (this.keyboard.isDown(this.keyboard.KEYS.RIGHT)) {
+            this.angle -= Math.PI/36;
+        }
+
+        this.angle = modulo(this.angle, 2 * Math.PI);
+
         if (this.keyboard.isDown(this.keyboard.KEYS.UP)) {
-            this.momentum = this.momentum.add(new CanvasVector(.15, this.angle)).magnatudeRange(0, PlayerShip.MAX_MAGNATUDE);
+            this.momentum = this.momentum.add(new CanvasVector(.15, -this.angle)).magnatudeRange(0, PlayerShip.MAX_MAGNATUDE);
         }
 
         if (this.keyboard.isDown(this.keyboard.KEYS.SPACE)) {
