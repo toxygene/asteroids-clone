@@ -6,7 +6,7 @@ define(function(require) {
         this.momentum = momentum.addMagnatude(5);
         this.valid = true;
 
-        setTimeout(function() { this.valid = false; }.bind(this), 1750);
+        setTimeout(function() { this.remove(); }.bind(this), 1750);
     };
 
     Bullet.prototype.draw = function(screen, gameSize) {
@@ -17,8 +17,18 @@ define(function(require) {
         screen.restore();
     };
 
+    Bullet.prototype.getVertex = function() {
+        return [ this.center.x, this.center.y ];
+    };
+
     Bullet.prototype.isValid = function() {
         return this.valid;
+    };
+
+    Bullet.prototype.remove = function() {
+        this.valid = false;
+
+        return this;
     };
 
     Bullet.prototype.update = function(gameSize) {

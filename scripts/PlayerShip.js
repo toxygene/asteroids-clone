@@ -6,12 +6,13 @@ define(function(require) {
     var rotate = require('utilities/rotate');
     var throttle = require('utilities/throttle');
 
-    var PlayerShip = function() {
+    var PlayerShip = function(center) {
         this.angle = -Math.PI/2;
-        this.center = null;
+        this.center = center;
         this.momentum = new CanvasVector(0, this.angle);
         this.keyboard = new Keyboard();
         this.bullets = [];
+        this.valid = true;
         this.attemptToFireBullet = throttle(this.attemptToFireBullet.bind(this), PlayerShip.MIN_BULLET_THROTTLE);
 
         setInterval(function() {
@@ -22,6 +23,7 @@ define(function(require) {
     PlayerShip.MIN_BULLET_THROTTLE = 250;
     PlayerShip.MAX_BULLETS         = 5;
     PlayerShip.MAX_MAGNATUDE       = 3.5;
+    PlayerShip.COLOR               = '#FFF';
 
     PlayerShip.prototype.draw = function(screen, gameSize) {
         this.drawShip(screen, gameSize)
@@ -34,7 +36,7 @@ define(function(require) {
 
         screen.translate(this.center.x, this.center.y);
         screen.rotate(this.angle);
-        screen.strokeStyle = "#FFFFFF";
+        screen.strokeStyle = PlayerShip.COLOR;
 
         screen.beginPath();
         screen.moveTo(10, 0);
@@ -59,7 +61,7 @@ define(function(require) {
             }
 
             screen.save();
-            screen.strokeStyle = "#FFFFFF";
+            screen.strokeStyle = PlayerShip.COLOR;
             screen.translate(this.center.x - (x * gameSize.x), this.center.y - (y * gameSize.y));
             screen.rotate(this.angle);
             screen.beginPath();
@@ -86,11 +88,11 @@ define(function(require) {
         }.bind(this.center));
     };
 
-    PlayerShip.prototype.update = function(gameSize) {
-        if (this.center === null) {
-            this.center = { x: gameSize.x / 2, y: gameSize.y / 2 };
-        }
+    PlayerShip.prototype.isValid = function() {
+        return this.valid;
+    };
 
+    PlayerShip.prototype.update = function(gameSize) {
         if (this.keyboard.isDown(this.keyboard.KEYS.LEFT)) {
             this.angle -= Math.PI/36;
         }

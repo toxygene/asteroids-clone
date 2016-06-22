@@ -1,44 +1,14 @@
 define(function(require) {
     var modulo = require('utilities/modulo');
     var rotate = require('utilities/rotate');
-
-    function generateRandomPolygon(vertices) {
-        var angleSteps = [];
-        var numberAngles = 2 * Math.PI / vertices;
-        var sum = 0;
-
-        for (var i = 0; i < vertices; ++i) {
-            var tmp = numberAngles;
-            angleSteps.push(tmp);
-            sum += tmp;
-        }
-
-        var k = sum / (2 * Math.PI);
-        for (i = 0; i < vertices; ++i) {
-            angleSteps[i] = angleSteps[i] / k;
-        }
-
-        var points = [];
-        var angle = Math.random(0, 2 * Math.PI);
-
-        for (i = 0; i < vertices; ++i) {
-            var r_i = Math.max(0, Math.min(Math.randomGaussian(40, 20), 80));
-            var x = r_i * Math.cos(angle);
-            var y = r_i * Math.sin(angle);
-
-            points.push([parseInt(x), parseInt(y)]);
-
-            angle += angleSteps[i];
-        }
-
-        return points;
-    };
+    var generateRandomPolygon = require('utilities/generateRandomPolygon');
 
     function Asteroid(center, momentum) {
         this.center = center;
         this.momentum = momentum;
+        this.valid = true;
 
-        this.points = generateRandomPolygon(Math.getRandomInt(5, 8))
+        this.points = generateRandomPolygon(Math.getRandomInt(5, 8));
     }
 
     Asteroid.prototype.draw = function(screen, gameSize) {
@@ -67,13 +37,9 @@ define(function(require) {
     };
 
     Asteroid.prototype.drawGhosts = function(screen, gameSize) {
-        for (var i = 0; i < 9; ++i) {
-            var x = modulo(i, 3) - 1;
+        for (var i = 0; i < 8; ++i) {
+            var x = modulo(i - 6, 3) - 1;
             var y = Math.floor(i / 3) - 1;
-
-            if (x == 0 && y == 0) {
-                continue;
-            }
 
             screen.save();
             screen.strokeStyle = "#FFFFFF";
@@ -91,10 +57,20 @@ define(function(require) {
         return this;
     };
 
-    Asteroid.prototype.getVerticies = function() {
+    Asteroid.prototype.getVertices = function() {
         return this.points.map(function(point) {
             return [point[0] + this.x, point[1] + this.y];
         }.bind(this.center));
+    };
+
+    Asteroid.prototype.isValid = function() {
+        return this.valid;
+    };
+
+    Asteroid.prototype.remove = function() {
+        this.valid = false;
+
+        return this;
     };
 
     Asteroid.prototype.update = function(gameSize) {
