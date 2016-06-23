@@ -1,5 +1,6 @@
 define(function(require) {
     var Disintegration = function(vertices) {
+        this.ticks = 0;
         this.valid = true;
 
         this.lines = [];
@@ -12,11 +13,17 @@ define(function(require) {
         }
     };
 
+    Disintegration.TIME_TO_LIVE = 50;
+
     Disintegration.prototype.draw = function(screen, gameSize) {
         screen.save();
 
         screen.translate(0, 0);
         screen.strokeStyle = "#999";
+
+        var percentComplete = this.ticks / Disintegration.TIME_TO_LIVE;
+        var color = Math.floor(0x9 - (0x9 * percentComplete));
+        screen.strokeStyle = '#' + color.toString(16).repeat(3);
 
         screen.beginPath();
         this.lines.forEach(function(line) {
@@ -33,10 +40,11 @@ define(function(require) {
     };
 
     Disintegration.prototype.isValid = function() {
-        return this.valid;
+        return this.ticks < Disintegration.TIME_TO_LIVE;
     }
 
     Disintegration.prototype.update = function(gameSize) {
+        this.ticks += 1;
     };
 
     return Disintegration;
