@@ -23,7 +23,7 @@ define(function(require) {
             var x = r_i * Math.cos(angle);
             var y = r_i * Math.sin(angle);
 
-            points.push([parseInt(x), parseInt(y)]);
+            points.push({ x: parseInt(x), y: parseInt(y) });
 
             angle += angleSteps[i];
         }

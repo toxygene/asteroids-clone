@@ -13,11 +13,11 @@ define(function(require) {
         this.keyboard = new Keyboard();
         this.bullets = [];
         this.valid = true;
-        this.attemptToFireBullet = throttle(this.attemptToFireBullet.bind(this), PlayerShip.MIN_BULLET_THROTTLE);
+        this.attemptToFireBullet = throttle(this.attemptToFireBullet.bind(this), PlayerShip.MIN_BULLET_THROTTLE); // refactor to use ticks instead of time
 
         setInterval(function() {
             this.momentum = this.momentum.addMagnatude(-.1).magnatudeRange(0, PlayerShip.MAX_MAGNATUDE);
-        }.bind(this), 50);
+        }.bind(this), 50); // refactor to use ticks instead of time
     };
 
     PlayerShip.COLOR               = '#FFF';
@@ -25,9 +25,11 @@ define(function(require) {
     PlayerShip.MAX_MAGNATUDE       = 3.5;
     PlayerShip.MIN_BULLET_THROTTLE = 250;
     PlayerShip.SHAPE               = [
-        [10, 0],
-        [-10, 6],
-        [-10, -6]
+        { x: 10, y: 0 },
+        { x: 0, y: 3 },
+        { x: -10, y: 6 },
+        { x: -10, y: -6 },
+        { x: 0, y: -3 }
     ];
 
     PlayerShip.prototype.attemptToFireBullet = function() {
@@ -45,21 +47,17 @@ define(function(require) {
     };
 
     PlayerShip.prototype.drawShip = function(screen, gameSize) {
-        screen.save();
-
         var vertices = this.getVertices();
         var first    = vertices.shift();
 
-        screen.strokeStyle = PlayerShip.COLOR;
         screen.beginPath();
-        screen.moveTo(first[0], first[1]);
+        screen.strokeStyle = PlayerShip.COLOR;
+        screen.moveTo(first.x, first.y);
         vertices.forEach(function(vertex) {
-            screen.lineTo(vertex[0], vertex[1]);
+            screen.lineTo(vertex.x, vertex.y);
         });
         screen.closePath();
         screen.stroke();
-
-        screen.restore();
 
         return this;
     };
@@ -80,9 +78,9 @@ define(function(require) {
 
             screen.strokeStyle = PlayerShip.COLOR;
             screen.beginPath();
-            screen.moveTo(first[0] + (gameSize.x * x), first[1] + (gameSize.y * y));
+            screen.moveTo(first.x + (gameSize.x * x), first.y + (gameSize.y * y));
             vertices.forEach(function(vertex) {
-                screen.lineTo(vertex[0] + (gameSize.x * x), vertex[1] + (gameSize.y * y));
+                screen.lineTo(vertex.x + (gameSize.x * x), vertex.y + (gameSize.y * y));
             });
             screen.closePath();
             screen.stroke();
@@ -100,8 +98,8 @@ define(function(require) {
     };
 
     PlayerShip.prototype.getVertices = function() {
-        return rotate(PlayerShip.SHAPE, this.angle).map(function(point) {
-            return [point[0] + this.x, point[1] + this.y]
+        return rotate(PlayerShip.SHAPE, this.angle, { x: 0, y: 0}).map(function(point) {
+            return { x: point.x + this.x, y: point.y + this.y };
         }.bind(this.center));
     };
 

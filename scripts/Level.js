@@ -10,15 +10,15 @@ define(function(require) {
         this.objects = null;
 	};
 
-	Level.prototype.draw = function(screen, gameSize) {
-		screen.save();
-		screen.clearRect(0, 0, gameSize.x, gameSize.y);
-		screen.fillStyle = "#000000";
-		screen.fillRect(0, 0, gameSize.x, gameSize.y);
-		screen.restore();
+	Level.prototype.draw = function(context, gameSize) {
+		context.setTransform(1, 0, 0, 1, 0, 0);
+		context.clearRect(0, 0, gameSize.x, gameSize.Y);
+
+		context.fillStyle = "#000000";
+		context.fillRect(0, 0, gameSize.x, gameSize.y);
 
         this.objects.forEach(function(object) {
-            object.draw(screen, gameSize);
+            object.draw(context, gameSize);
         });
 
 		return this;
@@ -27,12 +27,19 @@ define(function(require) {
 	Level.prototype.update = function(gameSize) {
 	    // Setup the initial level state
         if (this.objects === null) {
+            // Create the players ship
             this.objects = [
                 new PlayerShip({ x: gameSize.x / 2, y: gameSize.y / 2 })
             ];
 
-            for (var i = 0, n = Math.getRandomInt(1, 4); i < n; ++i) {
-                this.objects.push(new Asteroid({ x: Math.getRandomInt(0, gameSize.x), y: Math.getRandomInt(0, gameSize.y) }, new CanvasVector(.5, Math.random() * Math.PI)));
+            // Create asteroid(s)
+            for (var i = 0, n = Math.getRandomInt(2, 4); i < n; ++i) {
+                this.objects.push(
+                    new Asteroid(
+                        { x: Math.getRandomInt(0, gameSize.x), y: Math.getRandomInt(0, gameSize.y) },
+                        new CanvasVector(.5, Math.random() * Math.PI)
+                    )
+                );
             }
         }
 
@@ -66,8 +73,7 @@ define(function(require) {
             });
 
             if (asteroid) {
-                this.objects.push(new Disintegration(playerShip.getVertices()));
-                this.objects.push(new Disintegration(asteroid.getVertices()));
+                this.objects.push(new Disintegration(playerShip.getVertices(), asteroid.momentum.add(playerShip.momentum)));
 
                 playerShip.remove();
                 asteroid.remove();

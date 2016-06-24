@@ -10,15 +10,12 @@ define(function(require) {
     };
 
     Bullet.prototype.draw = function(screen, gameSize) {
-        screen.save();
-        screen.translate(modulo(this.center.x, gameSize.x), modulo(this.center.y, gameSize.y));
         screen.fillStyle = '#FFFFFF';
-        screen.fillRect(-2, -2, 2, 2);
-        screen.restore();
+        screen.fillRect(this.center.x - 1, this.center.y - 1, 2, 2);
     };
 
     Bullet.prototype.getVertex = function() {
-        return [ this.center.x, this.center.y ];
+        return { x: this.center.x, y: this.center.y };
     };
 
     Bullet.prototype.isValid = function() {

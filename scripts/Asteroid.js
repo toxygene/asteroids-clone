@@ -1,6 +1,5 @@
 define(function(require) {
     var modulo = require('utilities/modulo');
-    var rotate = require('utilities/rotate');
     var generateRandomPolygon = require('utilities/generateRandomPolygon');
 
     function Asteroid(center, momentum) {
@@ -19,21 +18,17 @@ define(function(require) {
     };
 
     Asteroid.prototype.drawAsteroid = function(screen, gameSize) {
-        screen.save();
-
         var vertices = this.getVertices();
         var first    = vertices.shift();
 
-        screen.strokeStyle = Asteroid.COLOR;
         screen.beginPath();
-        screen.moveTo(first[0], first[1]);
+        screen.strokeStyle = Asteroid.COLOR;
+        screen.moveTo(first.x, first.y);
         vertices.forEach(function(vertex) {
-            screen.lineTo(vertex[0], vertex[1]);
+            screen.lineTo(vertex.x, vertex.y);
         });
         screen.closePath();
         screen.stroke();
-
-        screen.restore();
 
         return this;
     };
@@ -46,18 +41,14 @@ define(function(require) {
             var x = modulo(i - 6, 3) - 1;
             var y = Math.floor(i / 3) - 1;
 
-            screen.save();
-            screen.strokeStyle = "#FFFFFF";
-            screen.translate(x * gameSize.x, y * gameSize.y);
             screen.beginPath();
-            screen.moveTo(first[0], first[1]);
+            screen.strokeStyle = "#FFFFFF";
+            screen.moveTo(first.x + (x * gameSize.x), first.y + (y * gameSize.y));
             vertices.forEach(function(vertex) {
-                screen.lineTo(vertex[0], vertex[1]);
+                screen.lineTo(vertex.x + (x * gameSize.x), vertex.y + y * gameSize.y);
             });
             screen.closePath();
-            screen.closePath();
             screen.stroke();
-            screen.restore();
         }
 
         return this;
@@ -65,7 +56,7 @@ define(function(require) {
 
     Asteroid.prototype.getVertices = function() {
         return this.points.map(function(point) {
-            return [point[0] + this.x, point[1] + this.y];
+            return { x: point.x + this.x, y: point.y + this.y };
         }.bind(this.center));
     };
 

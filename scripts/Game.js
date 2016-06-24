@@ -2,8 +2,8 @@ define(function(require) {
     var Level = require('Level');
 
     var Game = function(canvas) {
-        this.canvas = canvas;
-		this.screen = canvas.getContext('2d');
+        this.canvas  = canvas;
+		this.context = canvas.getContext('2d');
 
 		this.onTickHandler = this.onTickHandler.bind(this);
     };
@@ -19,7 +19,7 @@ define(function(require) {
 
 		this.level
 		    .update(gameSize)
-			.draw(this.screen, gameSize);
+			.draw(this.context, gameSize);
 
 		requestAnimationFrame(this.onTickHandler);
 	};
