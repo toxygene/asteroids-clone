@@ -6,9 +6,10 @@ define(function(require) {
     var rotate = require('utilities/rotate');
     var throttle = require('utilities/throttle');
 
-    var PlayerShip = function(center) {
+    var PlayerShip = function(center, fireBullet) {
         this.angle = Math.PI/2;
         this.center = center;
+        this.fireBullet = fireBullet;
         this.momentum = new CanvasVector(0, this.angle);
         this.keyboard = new Keyboard();
         this.bullets = [];
@@ -34,7 +35,9 @@ define(function(require) {
 
     PlayerShip.prototype.attemptToFireBullet = function() {
         if (this.bullets.length < PlayerShip.MAX_BULLETS) {
-            this.bullets.push(new Bullet(this.center, new CanvasVector(this.momentum.getMagnatude(), -this.angle), this.gameSize));
+            var bullet = new Bullet(this.center, new CanvasVector(2, -this.angle), this.gameSize);
+            this.bullets.push(bullet);
+            this.fireBullet(bullet);
         }
 
         return true;
@@ -42,8 +45,7 @@ define(function(require) {
 
     PlayerShip.prototype.draw = function(screen, gameSize) {
         this.drawShip(screen, gameSize)
-            .drawGhostShips(screen, gameSize)
-            .drawBullets(screen, gameSize);
+            .drawGhostShips(screen, gameSize);
     };
 
     PlayerShip.prototype.drawShip = function(screen, gameSize) {
@@ -91,12 +93,6 @@ define(function(require) {
         return this;
     };
 
-    PlayerShip.prototype.drawBullets = function(screen, gameSize) {
-        this.bullets.forEach(function(bullet) {
-            bullet.draw(screen, gameSize);
-        });
-    };
-
     PlayerShip.prototype.getVertices = function() {
         return rotate(PlayerShip.SHAPE, this.angle, { x: 0, y: 0}).map(function(point) {
             return { x: point.x + this.x, y: point.y + this.y };
@@ -137,10 +133,6 @@ define(function(require) {
 
         this.bullets = this.bullets.filter(function(bullet) {
             return bullet.isValid();
-        });
-
-        this.bullets.forEach(function(bullet) {
-            bullet.update(gameSize);
         });
     };
 

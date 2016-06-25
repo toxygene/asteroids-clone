@@ -29,7 +29,7 @@ define(function(require) {
         if (this.objects === null) {
             // Create the players ship
             this.objects = [
-                new PlayerShip({ x: gameSize.x / 2, y: gameSize.y / 2 })
+                new PlayerShip({ x: gameSize.x / 2, y: gameSize.y / 2 }, function(bullet) { this.objects.push(bullet); }.bind(this))
             ];
 
             // Create asteroid(s)
