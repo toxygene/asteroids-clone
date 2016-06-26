@@ -37,7 +37,8 @@ define(function(require) {
                 this.objects.push(
                     new Asteroid(
                         { x: Math.getRandomInt(0, gameSize.x), y: Math.getRandomInt(0, gameSize.y) },
-                        new CanvasVector(.5, Math.random() * Math.PI)
+                        new CanvasVector(.5, Math.random() * 2 * Math.PI),
+                        3
                     )
                 );
             }
@@ -64,7 +65,9 @@ define(function(require) {
         playerShips.forEach(function(playerShip) {
             var playerShipPoints = playerShip.getVertices();
 
-            var asteroid = asteroids.find(function(asteroid) {
+            var asteroid = asteroids.filter(function(asteroid) {
+                return asteroid.isValid();
+            }).find(function(asteroid) {
                 var asteroidPoints = asteroid.getVertices();
 
                 return playerShipPoints.some(function(playerShipPoint) {
@@ -78,11 +81,13 @@ define(function(require) {
                 playerShip.remove();
                 asteroid.remove();
 
-                // split asteroid
+                if (asteroid.size != 1) {
+                    this.objects.push(asteroid.createSmallerAsteroid());
+                    this.objects.push(asteroid.createSmallerAsteroid());
+                }
             }
         }.bind(this));
 
-        // TODO move bullet adding code to here (out of PlayerShip)
         asteroids.forEach(function(asteroid) {
             var asteroidPoints = asteroid.getVertices();
 
@@ -96,9 +101,13 @@ define(function(require) {
                 bullet.remove();
                 asteroid.remove();
 
-                // split asteroid
+                if (asteroid.size != 1) {
+                    this.objects.push(asteroid.createSmallerAsteroid());
+                    this.objects.push(asteroid.createSmallerAsteroid());
+                }
+                debugger;
             }
-        });
+        }.bind(this));
 
 	    this.objects = this.objects.filter(function(object) {
 	        return object.isValid();

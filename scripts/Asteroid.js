@@ -1,16 +1,32 @@
 define(function(require) {
+    var CanvasVector = require('CanvasVector');
     var modulo = require('utilities/modulo');
     var generateRandomPolygon = require('utilities/generateRandomPolygon');
 
-    function Asteroid(center, momentum) {
+    function Asteroid(center, momentum, size) {
         this.center = center;
         this.momentum = momentum;
+        this.size = size;
         this.valid = true;
 
-        this.points = generateRandomPolygon(Math.getRandomInt(5, 8));
+        if (this.size == 3) {
+            this.points = generateRandomPolygon(30, 50, 20, 25, 50);
+        } else if (this.size == 2) {
+            this.points = generateRandomPolygon(10, 30, 15, 25, 50);
+        } else if (this.size == 1) {
+            this.points = generateRandomPolygon(5, 10, 10, 25, 50);
+        }
     }
 
     Asteroid.COLOR = '#FFF';
+
+    Asteroid.prototype.createSmallerAsteroid = function() {
+        return new Asteroid(
+            { x: this.center.x + Math.getRandomInt(-10, 10), y: this.center.y + Math.getRandomInt(-10, 10) },
+            new CanvasVector(.5, Math.random() * 2 * Math.PI),
+            this.size - 1
+        );
+    };
 
     Asteroid.prototype.draw = function(screen, gameSize) {
         this.drawAsteroid(screen, gameSize)
@@ -42,7 +58,7 @@ define(function(require) {
             var y = Math.floor(i / 3) - 1;
 
             screen.beginPath();
-            screen.strokeStyle = "#FFFFFF";
+            screen.strokeStyle = Asteroid.COLOR;
             screen.moveTo(first.x + (x * gameSize.x), first.y + (y * gameSize.y));
             vertices.forEach(function(vertex) {
                 screen.lineTo(vertex.x + (x * gameSize.x), vertex.y + y * gameSize.y);
