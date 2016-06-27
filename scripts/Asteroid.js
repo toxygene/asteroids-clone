@@ -22,7 +22,7 @@ define(function(require) {
 
     Asteroid.prototype.createSmallerAsteroid = function() {
         return new Asteroid(
-            { x: this.center.x + Math.getRandomInt(-10, 10), y: this.center.y + Math.getRandomInt(-10, 10) },
+            { x: this.center.x + Math.getRandomInt(-25, 25), y: this.center.y + Math.getRandomInt(-25, 25) },
             new CanvasVector(.5, Math.random() * 2 * Math.PI),
             this.size - 1
         );
