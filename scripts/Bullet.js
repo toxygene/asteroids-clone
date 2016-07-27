@@ -5,9 +5,10 @@ define(function(require) {
         this.center = { x: center.x, y: center.y };
         this.momentum = momentum.addMagnatude(5);
         this.valid = true;
+        this.ticks = 0;
+    }
 
-        setTimeout(function() { this.remove(); }.bind(this), 1750);
-    };
+    Bullet.TICKS_VALID_FOR = 75;
 
     Bullet.prototype.draw = function(screen, gameSize) {
         screen.fillStyle = '#FFFFFF';
@@ -22,15 +23,13 @@ define(function(require) {
         return this.valid;
     };
 
-    Bullet.prototype.remove = function() {
-        this.valid = false;
-
-        return this;
-    };
-
     Bullet.prototype.update = function(gameSize) {
+        ++this.ticks;
+
         this.center.x = modulo(this.center.x + this.momentum.getX(), gameSize.x);
         this.center.y = modulo(this.center.y + this.momentum.getY(), gameSize.y);
+
+        this.valid = this.ticks < Bullet.TICKS_VALID_FOR;
     };
 
     return Bullet;

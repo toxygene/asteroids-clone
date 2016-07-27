@@ -14,17 +14,14 @@ define(function(require) {
         this.keyboard = new Keyboard();
         this.bullets = [];
         this.valid = true;
-        this.attemptToFireBullet = throttle(this.attemptToFireBullet.bind(this), PlayerShip.MIN_BULLET_THROTTLE); // refactor to use ticks instead of time
-
-        setInterval(function() {
-            this.momentum = this.momentum.addMagnatude(-.1).magnatudeRange(0, PlayerShip.MAX_MAGNATUDE);
-        }.bind(this), 50); // refactor to use ticks instead of time
+        this.ticksSinceLastShot = PlayerShip.MIN_BULLET_THROTTLE;
     };
 
     PlayerShip.COLOR               = '#FFF';
+    PlayerShip.MAGNATUDE_DECAY     = 0.04;
     PlayerShip.MAX_BULLETS         = 5;
     PlayerShip.MAX_MAGNATUDE       = 3.5;
-    PlayerShip.MIN_BULLET_THROTTLE = 250;
+    PlayerShip.MIN_BULLET_THROTTLE = 15;
     PlayerShip.SHAPE               = [
         { x: 10, y: 0 },
         { x: 0, y: 3 },
@@ -34,10 +31,11 @@ define(function(require) {
     ];
 
     PlayerShip.prototype.attemptToFireBullet = function() {
-        if (this.bullets.length < PlayerShip.MAX_BULLETS) {
+        if (this.ticksSinceLastShot > PlayerShip.MIN_BULLET_THROTTLE && this.bullets.length < PlayerShip.MAX_BULLETS) {
             var bullet = new Bullet(this.center, new CanvasVector(2, -this.angle), this.gameSize);
             this.bullets.push(bullet);
             this.fireBullet(bullet);
+            this.ticksSinceLastShot = 0;
         }
 
         return true;
@@ -110,6 +108,10 @@ define(function(require) {
     };
 
     PlayerShip.prototype.update = function(gameSize) {
+        ++this.ticksSinceLastShot;
+
+        this.momentum = this.momentum.addMagnatude(-PlayerShip.MAGNATUDE_DECAY).magnatudeRange(0, PlayerShip.MAX_MAGNATUDE);
+
         if (this.keyboard.isDown(this.keyboard.KEYS.LEFT)) {
             this.angle += Math.PI/36;
         }
