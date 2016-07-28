@@ -4,7 +4,6 @@ define(function(require) {
     var Keyboard = require('Keyboard');
     var modulo = require('utilities/modulo');
     var rotate = require('utilities/rotate');
-    var throttle = require('utilities/throttle');
 
     var PlayerShip = function(center, fireBullet) {
         this.angle = Math.PI/2;
@@ -32,7 +31,7 @@ define(function(require) {
 
     PlayerShip.prototype.attemptToFireBullet = function() {
         if (this.ticksSinceLastShot > PlayerShip.MIN_BULLET_THROTTLE && this.bullets.length < PlayerShip.MAX_BULLETS) {
-            var bullet = new Bullet(this.center, new CanvasVector(2, -this.angle), this.gameSize);
+            var bullet = new Bullet(this.getVertices()[0], new CanvasVector(2, -this.angle), this.gameSize);
             this.bullets.push(bullet);
             this.fireBullet(bullet);
             this.ticksSinceLastShot = 0;
