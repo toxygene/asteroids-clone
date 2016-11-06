@@ -1,26 +1,26 @@
-define(function(require) {
-    function CanvasVector(magnatude, angle) {
+export default class CanvasVector {
+    constructor(magnatude, angle) {
         this.magnatude = magnatude;
         this.angle = angle;
     }
 
-    CanvasVector.prototype.getX = function() {
+    getX() {
         return this.getMagnatude() * Math.cos(this.getAngle());
     };
 
-    CanvasVector.prototype.getY = function() {
+    getY() {
         return this.getMagnatude() * Math.sin(this.getAngle());
     };
 
-    CanvasVector.prototype.getMagnatude = function() {
+    getMagnatude() {
         return this.magnatude;
     };
 
-    CanvasVector.prototype.getAngle = function() {
+    getAngle() {
         return this.angle;
     };
 
-    CanvasVector.prototype.add = function(that) {
+    add(that) {
         var x = this.getX() + that.getX();
         var y = this.getY() + that.getY();
 
@@ -30,11 +30,11 @@ define(function(require) {
         return new CanvasVector(magnitude, angle);
     };
 
-    CanvasVector.prototype.addMagnatude = function(magnatude) {
+    addMagnatude(magnatude) {
         return new CanvasVector(this.getMagnatude() + magnatude, this.getAngle());
     };
 
-    CanvasVector.prototype.magnatudeRange = function(min, max) {
+    magnatudeRange(min, max) {
         if (this.getMagnatude() < min) {
             return new CanvasVector(min, this.getAngle());
         } else if (this.getMagnatude() > max) {
@@ -43,6 +43,4 @@ define(function(require) {
 
         return this;
     };
-
-    return CanvasVector;
-});
+}

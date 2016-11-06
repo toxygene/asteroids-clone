@@ -1,16 +1,16 @@
-define(function(require) {
-    var Asteroid       = require('Asteroid');
-    var Bullet         = require('Bullet');
-    var CanvasVector   = require('CanvasVector');
-    var Disintegration = require('Disintegration');
-    var inside         = require('utilities/inside');
-    var PlayerShip     = require('PlayerShip');
+import Asteroid from './Asteroid';
+import Bullet from './Bullet';
+import CanvasVector from './CanvasVector';
+import Disintegration from './Disintegration';
+import inside from './utilities/inside';
+import PlayerShip from './PlayerShip';
 
-	var Level = function() {
+export default class {
+	constructor() {
         this.objects = null;
 	};
 
-	Level.prototype.draw = function(context, gameSize) {
+	draw(context, gameSize) {
 		context.setTransform(1, 0, 0, 1, 0, 0);
 		context.clearRect(0, 0, gameSize.x, gameSize.Y);
 
@@ -24,7 +24,7 @@ define(function(require) {
 		return this;
 	};
 
-	Level.prototype.update = function(gameSize) {
+	update(gameSize) {
 	    // Setup the initial level state
         if (this.objects === null) {
             // Create the players ship
@@ -115,6 +115,4 @@ define(function(require) {
 
 		return this;
 	};
-
-	return Level;
-});
+}

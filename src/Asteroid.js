@@ -1,9 +1,11 @@
-define(function(require) {
-    var CanvasVector = require('CanvasVector');
-    var modulo = require('utilities/modulo');
-    var generateRandomPolygon = require('utilities/generateRandomPolygon');
+import CanvasVector from './CanvasVector';
+import modulo from './utilities/modulo';
+import generateRandomPolygon from './utilities/generateRandomPolygon';
 
-    function Asteroid(center, momentum, size) {
+export default class Asteroid {
+    constructor(center, momentum, size) {
+        this.color = '#FFF';
+
         this.center = center;
         this.momentum = momentum;
         this.size = size;
@@ -18,9 +20,7 @@ define(function(require) {
         }
     }
 
-    Asteroid.COLOR = '#FFF';
-
-    Asteroid.prototype.createSmallerAsteroid = function() {
+    createSmallerAsteroid() {
         return new Asteroid(
             { x: this.center.x + Math.getRandomInt(-25, 25), y: this.center.y + Math.getRandomInt(-25, 25) },
             new CanvasVector(.5, Math.random() * 2 * Math.PI),
@@ -28,17 +28,17 @@ define(function(require) {
         );
     };
 
-    Asteroid.prototype.draw = function(screen, gameSize) {
+    draw(screen, gameSize) {
         this.drawAsteroid(screen, gameSize)
             .drawGhosts(screen, gameSize);
     };
 
-    Asteroid.prototype.drawAsteroid = function(screen, gameSize) {
+    drawAsteroid(screen, gameSize) {
         var vertices = this.getVertices();
         var first    = vertices.shift();
 
         screen.beginPath();
-        screen.strokeStyle = Asteroid.COLOR;
+        screen.strokeStyle = this.color;
         screen.moveTo(first.x, first.y);
         vertices.forEach(function(vertex) {
             screen.lineTo(vertex.x, vertex.y);
@@ -49,7 +49,7 @@ define(function(require) {
         return this;
     };
 
-    Asteroid.prototype.drawGhosts = function(screen, gameSize) {
+    drawGhosts(screen, gameSize) {
         var vertices = this.getVertices();
         var first    = vertices.shift();
 
@@ -58,7 +58,7 @@ define(function(require) {
             var y = Math.floor(i / 3) - 1;
 
             screen.beginPath();
-            screen.strokeStyle = Asteroid.COLOR;
+            screen.strokeStyle = this.color;
             screen.moveTo(first.x + (x * gameSize.x), first.y + (y * gameSize.y));
             vertices.forEach(function(vertex) {
                 screen.lineTo(vertex.x + (x * gameSize.x), vertex.y + y * gameSize.y);
@@ -70,26 +70,24 @@ define(function(require) {
         return this;
     };
 
-    Asteroid.prototype.getVertices = function() {
+    getVertices() {
         return this.points.map(function(point) {
             return { x: point.x + this.x, y: point.y + this.y };
         }.bind(this.center));
     };
 
-    Asteroid.prototype.isValid = function() {
+    isValid() {
         return this.valid;
     };
 
-    Asteroid.prototype.remove = function() {
+    remove() {
         this.valid = false;
 
         return this;
     };
 
-    Asteroid.prototype.update = function(gameSize) {
+    update(gameSize) {
         this.center.x = modulo(this.center.x + this.momentum.getX(), gameSize.x);
         this.center.y = modulo(this.center.y + this.momentum.getY(), gameSize.y);
     };
-
-    return Asteroid;
-});
+}

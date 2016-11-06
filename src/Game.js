@@ -1,20 +1,22 @@
-define(function(require) {
-    var Level = require('Level');
+"use strict";
 
-    var Game = function(canvas) {
+import Level from './Level';
+
+export default class Game {
+    constructor(canvas) {
         this.canvas  = canvas;
 		this.context = canvas.getContext('2d');
 
 		this.onTickHandler = this.onTickHandler.bind(this);
-    };
-
-    Game.prototype.start = function() {
+    }
+    
+    start() {
         this.level = new Level();
 
 		this.onTickHandler();
     };
 
-	Game.prototype.onTickHandler = function() {
+	onTickHandler() {
 	    var gameSize = { x: this.canvas.width, y: this.canvas.height };
 
 		this.level
@@ -23,6 +25,4 @@ define(function(require) {
 
 		requestAnimationFrame(this.onTickHandler);
 	};
-
-    return Game;
-});
+}

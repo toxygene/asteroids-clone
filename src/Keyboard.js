@@ -1,5 +1,7 @@
-define(function(require) {
-	var Keyboard = function() {
+export default class Keyboard {
+	constructor() {
+	    this.keys = { left: 37, up: 38, right: 39, down: 40, space: 32 };
+	    
 		this.keyState = {};
 		
 		window.onkeydown = function(e) {
@@ -11,11 +13,7 @@ define(function(require) {
 		}.bind(this);
 	};
 	
-	Keyboard.prototype.isDown = function(keyCode) {
+	isDown(keyCode) {
 		return this.keyState[keyCode] === true;
 	};
-
-	Keyboard.prototype.KEYS = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, SPACE: 32 };
-	
-	return Keyboard;
-});
+}

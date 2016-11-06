@@ -1,9 +1,11 @@
-define(function(require) {
-    var CanvasVector = require('CanvasVector');
-    var modulo       = require('utilities/modulo');
-    var rotate       = require('utilities/rotate');
+import CanvasVector from './CanvasVector';
+import modulo from './utilities/modulo';
+import rotate from './utilities/rotate';
 
-    var Disintegration = function(vertices) {
+export default class Disintegration {
+    constructor(vertices) {
+        this.time_to_live = 50;
+
         this.pieces = [];
         this.ticks = 0;
         this.valid = true;
@@ -20,12 +22,10 @@ define(function(require) {
         }
     };
 
-    Disintegration.TIME_TO_LIVE = 50;
-
-    Disintegration.prototype.draw = function(screen, gameSize) {
+    draw(screen, gameSize) {
         screen.save();
         screen.strokeStyle = '#FFF';
-        screen.globalAlpha = 1 - (this.ticks / Disintegration.TIME_TO_LIVE);
+        screen.globalAlpha = 1 - (this.ticks / this.time_to_live);
 
         this.pieces.forEach(function(piece) {
             screen.beginPath();
@@ -41,11 +41,11 @@ define(function(require) {
         return this;
     };
 
-    Disintegration.prototype.isValid = function() {
-        return this.ticks < Disintegration.TIME_TO_LIVE;
+    isValid() {
+        return this.ticks < this.time_to_live;
     }
 
-    Disintegration.prototype.update = function(gameSize) {
+    update(gameSize) {
         this.pieces = this.pieces.map(function(piece) {
             var center = { x: (piece[0].x + piece[1].x) / 2, y: (piece[0].y + piece[1].y) / 2 };
             var rotated = rotate([piece[0], piece[1]], piece[3], center);
@@ -60,6 +60,4 @@ define(function(require) {
 
         this.ticks += 1;
     };
-
-    return Disintegration;
-});
+}
