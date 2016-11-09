@@ -1,13 +1,15 @@
+"use strict";
+
 import modulo from './utilities/modulo';
 
 export default class Bullet {
     constructor(center, momentum) {
+        this.bulletTimeToLive = 1000;
         this.center = { x: center.x, y: center.y };
-        this.momentum = momentum.addMagnatude(5);
+        this.elapsedTime = 0;
+        this.momentum = momentum.addMagnatude(400);
         this.valid = true;
-        this.ticks = 0;
-        this.ticksValidFor = 75;
-    }
+    };
 
     draw(screen, gameSize) {
         screen.fillStyle = '#FFFFFF';
@@ -19,7 +21,7 @@ export default class Bullet {
     };
 
     isValid() {
-        return this.valid;
+        return this.valid === true && this.elapsedTime < this.bulletTimeToLive;
     };
 
     remove() {
@@ -28,10 +30,10 @@ export default class Bullet {
         return this;
     };
 
-    update(gameSize) {
-        this.center.x = modulo(this.center.x + this.momentum.getX(), gameSize.x);
-        this.center.y = modulo(this.center.y + this.momentum.getY(), gameSize.y);
+    update(gameSize, elapsedTime) {
+        this.center.x = modulo(this.center.x + (this.momentum.getX() * (elapsedTime / 1000)), gameSize.x);
+        this.center.y = modulo(this.center.y + (this.momentum.getY() * (elapsedTime / 1000)), gameSize.y);
 
-        this.valid = this.ticks < this.ticksValidFor;
+        this.elapsedTime += elapsedTime;
     };
 };

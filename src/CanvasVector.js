@@ -1,3 +1,5 @@
+"use strict";
+
 export default class CanvasVector {
     constructor(magnatude, angle) {
         this.magnatude = magnatude;

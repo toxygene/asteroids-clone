@@ -1,13 +1,23 @@
+"use strict";
+
 import Asteroid from './Asteroid';
 import Bullet from './Bullet';
 import CanvasVector from './CanvasVector';
 import Disintegration from './Disintegration';
+import getRandomInt from './utilities/getRandomInt';
 import inside from './utilities/inside';
+import Keyboard from './Keyboard';
+import modulo from './utilities/modulo';
 import PlayerShip from './PlayerShip';
+import SSCD from 'sscd';
 
 export default class {
 	constructor() {
+	    this.fireBulletCooldown = 0;
+	    this.bulletCooldownAmount = 350;
+        this.keyboard = new Keyboard();
         this.objects = null;
+        this.playerShip = null;
 	};
 
 	draw(context, gameSize) {
@@ -24,44 +34,60 @@ export default class {
 		return this;
 	};
 
-	update(gameSize) {
+	update(gameSize, elapsedTime) {
 	    // Setup the initial level state
         if (this.objects === null) {
-            // Create the players ship
-            this.objects = [
-                new PlayerShip({ x: gameSize.x / 2, y: gameSize.y / 2 }, function(bullet) { this.objects.push(bullet); }.bind(this))
-            ];
+            this.playerShip = new PlayerShip({ x: gameSize.x / 2, y: gameSize.y / 2 });
+
+            this.objects = [ this.playerShip ];
 
             // Create asteroid(s)
-            for (var i = 0, n = Math.getRandomInt(2, 4); i < n; ++i) {
+            for (var i = 0, n = getRandomInt(3, 5); i < n; ++i) {
                 this.objects.push(
                     new Asteroid(
-                        { x: Math.getRandomInt(0, gameSize.x), y: Math.getRandomInt(0, gameSize.y) },
+                        { x: getRandomInt(0, gameSize.x), y: getRandomInt(0, gameSize.y) },
                         new CanvasVector(.5, Math.random() * 2 * Math.PI),
                         3
                     )
                 );
             }
         }
+        
+        if (this.playerShip.isValid()) {
+            if (this.keyboard.isDown(this.keyboard.keys.left)) {
+                this.playerShip.turnLeft(elapsedTime / 1000);
+            }
+
+            if (this.keyboard.isDown(this.keyboard.keys.right)) {
+                this.playerShip.turnRight(elapsedTime / 1000);
+            }
+
+            if (this.keyboard.isDown(this.keyboard.keys.up)) {
+                this.playerShip.accelerate(elapsedTime / 1000);
+            }
+
+            if (this.keyboard.isDown(this.keyboard.keys.space) && this.fireBulletCooldown == 0) {
+                this.objects.push(new Bullet(this.playerShip.center, new CanvasVector(2, -this.playerShip.angle), this.gameSize));
+                this.fireBulletCooldown = this.bulletCooldownAmount;
+            }
+            
+            this.fireBulletCooldown = Math.max(0, this.fireBulletCooldown - elapsedTime);
+        }
 
         // Update all the objects
 	    this.objects.forEach(function(object) {
-	        object.update(gameSize);
+	        object.update(gameSize, elapsedTime);
 	    });
 
         // Split the objects into types and check for collisions
-	    var playerShips = this.objects.filter(function(object) {
-            return object instanceof PlayerShip;
-        });
+	    var playerShips = this.objects.filter(obj => obj instanceof PlayerShip);
+        var asteroids = this.objects.filter(obj => obj instanceof Asteroid);
+        var bullets = this.objects.filter(obj => obj instanceof Bullet);
+        
+        var world = new SSCD.sscd.World();
+        // todo implement collission detection
 
-        var asteroids = this.objects.filter(function(object) {
-            return object instanceof Asteroid;
-        });
-
-        var bullets = this.objects.filter(function(object) {
-            return object instanceof Bullet;
-        });
-
+       
         playerShips.forEach(function(playerShip) {
             var playerShipPoints = playerShip.getVertices();
 
@@ -105,10 +131,10 @@ export default class {
                     this.objects.push(asteroid.createSmallerAsteroid());
                     this.objects.push(asteroid.createSmallerAsteroid());
                 }
-                debugger;
             }
         }.bind(this));
 
+        
 	    this.objects = this.objects.filter(function(object) {
 	        return object.isValid();
         });

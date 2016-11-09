@@ -1,16 +1,19 @@
+"use strict";
+
 import Bullet from './Bullet';
 import CanvasVector from './CanvasVector';
-import Keyboard from './Keyboard';
 import modulo from './utilities/modulo';
 import rotate from './utilities/rotate';
-import throttle from './utilities/throttle';
 
 export default class PlayerShip {
-    constructor(center, fireBullet) {
+    constructor(initialCenter) {
+        this.accerlationAmount = 1000;
+        this.angle = Math.PI/2;
+        this.center = initialCenter;
         this.color = '#FFF';
-        this.maxBullets = 5;
-        this.maxMagnatude = 3.5;
-        this.minBulletThrottle = 250;
+        this.dragAmount = 175;
+        this.fireBulletCooldown = 0;
+        this.maxMagnatude = 225;
         this.shape = [
             { x: 10, y: 0 },
             { x: 0, y: 3 },
@@ -18,35 +21,23 @@ export default class PlayerShip {
             { x: -10, y: -6 },
             { x: 0, y: -3 }
         ];
-        
-        this.angle = Math.PI/2;
-        this.center = center;
-        this.fireBullet = fireBullet;
-        this.momentum = new CanvasVector(0, this.angle);
-        this.keyboard = new Keyboard();
-        this.bullets = [];
+        this.turnAmount = 5;
         this.valid = true;
-        this.attemptToFireBullet = throttle(this.attemptToFireBullet.bind(this), this.minBulletThrottle); // refactor to use ticks instead of time
-
-        setInterval(function() {
-            this.momentum = this.momentum.addMagnatude(-.1).magnatudeRange(0, this.maxMagnatude);
-        }.bind(this), 50); // refactor to use ticks instead of time
+        
+        this.momentum = new CanvasVector(0, this.angle);
     };
-
-    attemptToFireBullet() {
-        if (this.bullets.length < this.maxBullets) {
-            var bullet = new Bullet(this.center, new CanvasVector(2, -this.angle), this.gameSize);
-            this.bullets.push(bullet);
-            this.fireBullet(bullet);
-            this.ticksSinceLastShot = 0;
-        }
-
-        return true;
-    };
+    
+    accelerate(percent) {
+        this.momentum = this.momentum.add(new CanvasVector(this.accerlationAmount * percent, -this.angle)).magnatudeRange(0, this.maxMagnatude);
+        
+        return this;
+    }
 
     draw(screen, gameSize) {
         this.drawShip(screen, gameSize)
             .drawGhostShips(screen, gameSize);
+            
+        return this;
     };
 
     drawShip(screen, gameSize) {
@@ -109,31 +100,26 @@ export default class PlayerShip {
 
         return this;
     };
+    
+    turnLeft(percent) {
+        this.angle = modulo(this.angle + (this.turnAmount * percent), 2 * Math.PI);
+        
+        return this;
+    };
+    
+    turnRight(percent) {
+        this.angle = modulo(this.angle - (this.turnAmount * percent), 2 * Math.PI);
+        
+        return this;
+    };
 
-    update(gameSize) {
-        if (this.keyboard.isDown(this.keyboard.keys.left)) {
-            this.angle += Math.PI/36;
-        }
+    update(gameSize, elapsedTime) {
+        this.momentum = this.momentum.addMagnatude(-this.dragAmount * (elapsedTime / 1000)).magnatudeRange(0, this.maxMagnatude);
 
-        if (this.keyboard.isDown(this.keyboard.keys.right)) {
-            this.angle -= Math.PI/36;
-        }
+        this.center.x += this.momentum.getX() * (elapsedTime / 1000);
+        this.center.y += this.momentum.getY() * (elapsedTime / 1000);
 
-        this.angle = modulo(this.angle, 2 * Math.PI);
-
-        if (this.keyboard.isDown(this.keyboard.keys.up)) {
-            this.momentum = this.momentum.add(new CanvasVector(.15, -this.angle)).magnatudeRange(0, this.maxMagnatude);
-        }
-
-        if (this.keyboard.isDown(this.keyboard.keys.space)) {
-            this.attemptToFireBullet();
-        }
-
-        this.center.x = modulo(this.center.x + this.momentum.getX(), gameSize.x);
-        this.center.y = modulo(this.center.y + this.momentum.getY(), gameSize.y);
-
-        this.bullets = this.bullets.filter(function(bullet) {
-            return bullet.isValid();
-        });
+        this.center.x = modulo(this.center.x, gameSize.x);
+        this.center.y = modulo(this.center.y, gameSize.y);
     };
 };

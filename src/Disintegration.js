@@ -1,4 +1,7 @@
+"use strict";
+
 import CanvasVector from './CanvasVector';
+import getRandomInt from './utilities/getRandomInt';
 import modulo from './utilities/modulo';
 import rotate from './utilities/rotate';
 
@@ -11,7 +14,7 @@ export default class Disintegration {
         this.valid = true;
 
         for (var i = 0; i < vertices.length; ++i) {
-            var momentum = new CanvasVector(Math.random(), Math.getRandomInt(-Math.PI/4, Math.PI/4));
+            var momentum = new CanvasVector(Math.random(), getRandomInt(-Math.PI/4, Math.PI/4));
             var rotation = (Math.random() * (Math.PI / 32)) - (Math.PI / 64);
 
             if (i + 1 == vertices.length) {

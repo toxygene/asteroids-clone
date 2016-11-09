@@ -1,3 +1,5 @@
+"use strict";
+
 export default class Keyboard {
 	constructor() {
 	    this.keys = { left: 37, up: 38, right: 39, down: 40, space: 32 };

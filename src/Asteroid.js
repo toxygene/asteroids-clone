@@ -1,4 +1,7 @@
+"use strict";
+
 import CanvasVector from './CanvasVector';
+import getRandomInt from './utilities/getRandomInt';
 import modulo from './utilities/modulo';
 import generateRandomPolygon from './utilities/generateRandomPolygon';
 
@@ -22,7 +25,7 @@ export default class Asteroid {
 
     createSmallerAsteroid() {
         return new Asteroid(
-            { x: this.center.x + Math.getRandomInt(-25, 25), y: this.center.y + Math.getRandomInt(-25, 25) },
+            { x: this.center.x + getRandomInt(-25, 25), y: this.center.y + getRandomInt(-25, 25) },
             new CanvasVector(.5, Math.random() * 2 * Math.PI),
             this.size - 1
         );
@@ -86,7 +89,7 @@ export default class Asteroid {
         return this;
     };
 
-    update(gameSize) {
+    update(gameSize, elapsedTime) {
         this.center.x = modulo(this.center.x + this.momentum.getX(), gameSize.x);
         this.center.y = modulo(this.center.y + this.momentum.getY(), gameSize.y);
     };

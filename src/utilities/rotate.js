@@ -1,3 +1,5 @@
+"use strict";
+
 export default function (points, radians, center) {
     return points.map(function(point) {
         var x = point.x - center.x,

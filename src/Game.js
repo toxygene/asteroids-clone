@@ -13,15 +13,19 @@ export default class Game {
     start() {
         this.level = new Level();
 
+        this.last = Date.now();
 		this.onTickHandler();
     };
 
 	onTickHandler() {
+	    var now = Date.now();
 	    var gameSize = { x: this.canvas.width, y: this.canvas.height };
 
 		this.level
-		    .update(gameSize)
+		    .update(gameSize, now - this.last)
 			.draw(this.context, gameSize);
+
+        this.last = now;
 
 		requestAnimationFrame(this.onTickHandler);
 	};
